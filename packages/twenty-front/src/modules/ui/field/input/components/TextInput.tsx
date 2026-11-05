@@ -78,8 +78,10 @@ export const TextInput = ({
   const wrapperRef = useRef<HTMLInputElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
 
+  // Keep the raw text while typing so a space typed at the end is not dropped;
+  // consumers still receive the trimmed value, and submitted values are trimmed too
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setInternalText(getValue(event.target.value, shouldTrim));
+    setInternalText(event.target.value);
     onChange?.(getValue(event.target.value, shouldTrim));
   };
   useEffect(() => {
@@ -90,7 +92,7 @@ export const TextInput = ({
     focusId: instanceId,
     inputRef: wrapperRef,
     copyRef: copyRef,
-    inputValue: internalText,
+    inputValue: getValue(internalText, shouldTrim),
     onEnter,
     onEscape,
     onClickOutside,

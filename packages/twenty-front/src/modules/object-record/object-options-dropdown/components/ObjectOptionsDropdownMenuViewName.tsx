@@ -9,6 +9,7 @@ import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/use
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { type View } from '@/views/types/View';
 import { useUpdateViewFromCurrentState } from '@/views/view-picker/hooks/useUpdateViewFromCurrentState';
+import { viewPickerInputNameComponentState } from '@/views/view-picker/states/viewPickerInputNameComponentState';
 import { viewPickerIsDirtyComponentState } from '@/views/view-picker/states/viewPickerIsDirtyComponentState';
 import { viewPickerIsPersistingComponentState } from '@/views/view-picker/states/viewPickerIsPersistingComponentState';
 import { viewPickerSelectedIconComponentState } from '@/views/view-picker/states/viewPickerSelectedIconComponentState';
@@ -71,6 +72,10 @@ export const ObjectOptionsDropdownMenuViewName = ({
     viewPickerIsDirtyComponentState,
   );
 
+  const setViewPickerInputName = useSetAtomComponentState(
+    viewPickerInputNameComponentState,
+  );
+
   const { setAndPersistViewName, setAndPersistViewIcon } =
     useUpdateObjectViewOptions();
 
@@ -107,6 +112,11 @@ export const ObjectOptionsDropdownMenuViewName = ({
     setViewPickerSelectedIcon(currentView.icon);
   }, [currentView.icon, setViewPickerSelectedIcon]);
 
+  // Enter persists the picker name, so it must already hold the name typed in this input
+  useEffect(() => {
+    setViewPickerInputName(currentView.name);
+  }, [currentView.name, setViewPickerInputName]);
+
   useEffect(() => {
     if (currentView?.key !== 'INDEX' && inputRef.current !== null) {
       inputRef.current.focus();
@@ -139,6 +149,7 @@ export const ObjectOptionsDropdownMenuViewName = ({
               value={viewName}
               onChange={(value) => {
                 setViewName(value);
+                setViewPickerInputName(value);
                 handleViewNameChange(value);
               }}
               autoGrow={false}
