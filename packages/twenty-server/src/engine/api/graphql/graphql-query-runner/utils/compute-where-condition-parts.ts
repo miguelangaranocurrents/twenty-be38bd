@@ -25,6 +25,7 @@ export const computeWhereConditionParts = ({
   value,
   fieldMetadataType,
   useDirectTableReference = false,
+  isNegated = false,
 }: {
   operator: string;
   objectNameSingular: string;
@@ -34,6 +35,7 @@ export const computeWhereConditionParts = ({
   value: any;
   fieldMetadataType: FieldMetadataType;
   useDirectTableReference?: boolean;
+  isNegated?: boolean;
 }): WhereConditionParts => {
   const paramSuffix = randomBytes(5).toString('hex');
 
@@ -60,18 +62,24 @@ export const computeWhereConditionParts = ({
         sql: `${fieldReference} = '{}'${hasNullEquivalentFieldValue ? ` OR ${fieldReference} IS NULL` : ''}`,
         params: {},
       };
-    case 'eq':
-      if (isDateTimeField) {
+    case 'eq': {
+      const equalitySql = isDateTimeField
+        ? `(${fieldReference} >= :${key}${paramSuffix} AND ${fieldReference} < :${key}${paramSuffix}::timestamptz + interval '1 millisecond')`
+        : `${fieldReference} = :${key}${paramSuffix}`;
+
+      if (hasNullEquivalentFieldValue) {
         return {
-          sql: `(${fieldReference} >= :${key}${paramSuffix} AND ${fieldReference} < :${key}${paramSuffix}::timestamptz + interval '1 millisecond')${hasNullEquivalentFieldValue ? ` OR ${fieldReference} IS NULL` : ''}`,
+          sql: `${equalitySql} OR ${fieldReference} IS NULL`,
           params: { [`${key}${paramSuffix}`]: value },
         };
       }
 
+      // Under a NOT, a NULL value must count as "not equal" instead of dropping the row
       return {
-        sql: `${fieldReference} = :${key}${paramSuffix}${hasNullEquivalentFieldValue ? ` OR ${fieldReference} IS NULL` : ''}`,
+        sql: isNegated ? `COALESCE(${equalitySql}, FALSE)` : equalitySql,
         params: { [`${key}${paramSuffix}`]: value },
       };
+    }
     case 'neq':
       if (isDateTimeField) {
         return {

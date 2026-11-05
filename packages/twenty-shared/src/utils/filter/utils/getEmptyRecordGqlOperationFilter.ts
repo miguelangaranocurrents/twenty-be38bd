@@ -133,17 +133,37 @@ export const getEmptyRecordGqlOperationFilter = ({
       }
       break;
     }
-    case 'CURRENCY':
-      emptyRecordFilter = {
-        or: [
-          {
-            [correspondingField.name]: {
-              amountMicros: { is: 'NULL' },
-            } as CurrencyFilter,
-          },
-        ],
-      };
-      break;
+    case 'CURRENCY': {
+      if (!isSubFieldFilter || compositeFieldName === 'amountMicros') {
+        emptyRecordFilter = {
+          or: [
+            {
+              [correspondingField.name]: {
+                amountMicros: { is: 'NULL' },
+              } as CurrencyFilter,
+            },
+          ],
+        };
+        break;
+      }
+
+      if (compositeFieldName === 'currencyCode') {
+        emptyRecordFilter = {
+          or: [
+            {
+              [correspondingField.name]: {
+                currencyCode: { is: 'NULL' },
+              } as CurrencyFilter,
+            },
+          ],
+        };
+        break;
+      }
+
+      throw new Error(
+        `Unsupported composite field name ${compositeFieldName} for filter type ${filterType}`,
+      );
+    }
     case 'FULL_NAME': {
       if (!isSubFieldFilter) {
         const fullNameFilters = generateILikeFiltersForCompositeFields(

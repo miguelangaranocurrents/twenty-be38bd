@@ -69,6 +69,7 @@ export class GraphqlQueryFilterFieldParser {
     filterValue: any,
     isFirst = false,
     useDirectTableReference = false,
+    isNegated = false,
   ): void {
     const { fieldMetadata, isReferencedByFieldName } =
       resolveFilterKeyFieldMetadata({
@@ -136,6 +137,7 @@ export class GraphqlQueryFilterFieldParser {
         filterValue,
         isFirst,
         useDirectTableReference,
+        isNegated,
       );
     }
     const [[operator, value]] = Object.entries(filterValue);
@@ -149,6 +151,7 @@ export class GraphqlQueryFilterFieldParser {
       value,
       fieldMetadataType: fieldMetadata.type,
       useDirectTableReference,
+      isNegated,
     });
 
     if (isFirst) {
@@ -292,6 +295,7 @@ export class GraphqlQueryFilterFieldParser {
     fieldValue: any,
     isFirst = false,
     useDirectTableReference = false,
+    isNegated = false,
   ): void {
     const compositeType = compositeTypeDefinitions.get(
       fieldMetadata.type as CompositeFieldMetadataType,
@@ -335,6 +339,7 @@ export class GraphqlQueryFilterFieldParser {
         value,
         fieldMetadataType: fieldMetadata.type,
         useDirectTableReference,
+        isNegated,
       });
 
       if (isFirst && index === 0) {
