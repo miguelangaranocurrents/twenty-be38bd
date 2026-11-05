@@ -12,6 +12,7 @@ import { useUpdateViewFromCurrentState } from '@/views/view-picker/hooks/useUpda
 import { viewPickerInputNameComponentState } from '@/views/view-picker/states/viewPickerInputNameComponentState';
 import { viewPickerIsDirtyComponentState } from '@/views/view-picker/states/viewPickerIsDirtyComponentState';
 import { viewPickerIsPersistingComponentState } from '@/views/view-picker/states/viewPickerIsPersistingComponentState';
+import { viewPickerReferenceViewIdComponentState } from '@/views/view-picker/states/viewPickerReferenceViewIdComponentState';
 import { viewPickerSelectedIconComponentState } from '@/views/view-picker/states/viewPickerSelectedIconComponentState';
 import { styled } from '@linaria/react';
 import { useEffect, useRef, useState } from 'react';
@@ -76,6 +77,10 @@ export const ObjectOptionsDropdownMenuViewName = ({
     viewPickerInputNameComponentState,
   );
 
+  const setViewPickerReferenceViewId = useSetAtomComponentState(
+    viewPickerReferenceViewIdComponentState,
+  );
+
   const { setAndPersistViewName, setAndPersistViewIcon } =
     useUpdateObjectViewOptions();
 
@@ -112,7 +117,11 @@ export const ObjectOptionsDropdownMenuViewName = ({
     setViewPickerSelectedIcon(currentView.icon);
   }, [currentView.icon, setViewPickerSelectedIcon]);
 
-  // Enter persists the picker name, so it must already hold the name typed in this input
+  // Enter persists the view picker's reference view and name, so both must match the view edited here
+  useEffect(() => {
+    setViewPickerReferenceViewId(currentView.id);
+  }, [currentView.id, setViewPickerReferenceViewId]);
+
   useEffect(() => {
     setViewPickerInputName(currentView.name);
   }, [currentView.name, setViewPickerInputName]);
